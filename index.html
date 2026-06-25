@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SES Branch Manager Checklist</title>
+  <style>
+    :root {
+      --evergreen: #405647;
+      --ev-dark:   #2e3e34;
+      --ev-light:  #e8ede9;
+      --vermilion: #F15D22;
+      --limestone: #E2DDD9;
+      --graphite:  #373536;
+      --slate:     #505252;
+      --white:     #ffffff;
+      --radius:    8px;
+      --shadow:    0 2px 8px rgba(0,0,0,.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: var(--limestone);
+      color: var(--graphite);
+      min-height: 100vh;
+    }
+    .hidden { display: none !important; }
+
+    /* ── Header ── */
+    .app-header {
+      background: var(--evergreen);
+      color: var(--white);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .header-brand { display: flex; align-items: center; gap: 10px; }
+    .header-logo {
+      background: transparent;
+      padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      height: 38px; flex-shrink: 0;
+    }
+    .header-logo img { height: 36px; width: auto; display: block; }
+    .header-title { font-size: 14px; font-weight: 700; line-height: 1.2; }
+    .header-sub   { font-size: 11px; opacity: .75; }
+    .header-meta  { text-align: right; font-size: 11px; opacity: .85; line-height: 1.6; }
+
+    /* ── Setup ── */
+    #setup-screen { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
+    .setup-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 24px 20px; margin-top: 18px;
+    }
+    .setup-card h2 { font-size: 17px; color: var(--evergreen); margin-bottom: 5px; }
+    .setup-card p  { font-size: 13px; color: var(--slate); margin-bottom: 20px; line-height: 1.5; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--slate); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid #d0cbc7; border-radius: 6px;
+      font-size: 14px; color: var(--graphite); background: var(--white); appearance: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none; border-color: var(--evergreen);
+    }
+    .btn-primary {
+      display: block; width: 100%; padding: 13px;
+      background: var(--evergreen); color: var(--white);
+      border: none; border-radius: 6px; font-size: 15px; font-weight: 700;
+      cursor: pointer; margin-top: 4px;
+    }
+    .btn-primary:hover { background: var(--ev-dark); }
+
+    /* ── Context bar ── */
+    .context-bar {
+      background: var(--ev-dark); color: var(--white);
+      padding: 7px 16px; display: flex; align-items: center;
+      justify-content: space-between; font-size: 12px;
+    }
+    .context-bar a { color: var(--limestone); text-decoration: none; font-size: 11px; opacity: .8; }
+    .context-bar a:hover { opacity: 1; }
+
+    /* ── Tabs ── */
+    .tab-bar {
+      background: var(--white);
+      display: grid; grid-template-columns: repeat(4,1fr);
+      border-bottom: 2px solid var(--limestone);
+      position: sticky; top: 58px; z-index: 90;
+    }
+    .tab-btn {
+      padding: 11px 4px 9px; border: none; background: none; cursor: pointer;
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+      color: var(--slate); border-bottom: 3px solid transparent; margin-bottom: -2px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .tab-btn:hover { color: var(--evergreen); }
+    .tab-btn.active { color: var(--evergreen); border-bottom-color: var(--vermilion); }
+    .tab-pill {
+      min-width: 22px; height: 17px; padding: 0 5px;
+      border-radius: 9px; font-size: 10px; font-weight: 700;
+      background: var(--limestone); color: var(--slate);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .tab-btn.active .tab-pill { background: var(--ev-light); color: var(--evergreen); }
+    .tab-btn.done   .tab-pill { background: var(--evergreen); color: var(--white); }
+    .tab-btn.done            { color: var(--evergreen); }
+
+    /* ── Progress ── */
+    .progress-strip { padding: 9px 16px 5px; background: var(--white); }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--slate); margin-bottom: 5px;
+    }
+    .progress-label strong { color: var(--evergreen); }
+    .progress-track { height: 5px; background: var(--limestone); border-radius: 3px; overflow: hidden; }
+    .progress-fill  { height: 100%; background: var(--evergreen); border-radius: 3px; transition: width .3s; }
+    .progress-fill.complete { background: var(--vermilion); }
+
+    /* ── Checklist body ── */
+    .checklist-body { padding: 12px 16px 100px; max-width: 600px; margin: 0 auto; width: 100%; }
+
+    /* ── Submitted banner ── */
+    .submitted-banner {
+      background: var(--ev-light); border: 1.5px solid var(--evergreen);
+      border-radius: 6px; padding: 10px 14px;
+      display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px;
+    }
+    .submitted-banner svg { color: var(--evergreen); flex-shrink: 0; margin-top: 1px; }
+    .submitted-banner-text p    { font-size: 13px; color: var(--evergreen); font-weight: 600; }
+    .submitted-banner-text span { font-size: 11px; color: var(--slate); display: block; margin-top: 1px; }
+    .btn-resubmit {
+      margin-top: 6px; padding: 5px 10px;
+      background: none; border: 1.5px solid var(--evergreen);
+      border-radius: 4px; font-size: 11px; font-weight: 600;
+      color: var(--evergreen); cursor: pointer;
+    }
+    .btn-resubmit:hover { background: var(--evergreen); color: var(--white); }
+
+    /* ── Section ── */
+    .section { margin-bottom: 12px; }
+    .section-header {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--white); background: var(--evergreen);
+      padding: 5px 12px; border-radius: 4px 4px 0 0;
+    }
+    .section-items {
+      background: var(--white); border: 1px solid #ddd8d4;
+      border-top: none; border-radius: 0 0 4px 4px;
+    }
+
+    /* ── Item row ── */
+    .item-row {
+      display: flex; align-items: flex-start;
+      padding: 10px 12px; border-bottom: 1px solid #f0eceb;
+      gap: 10px; cursor: pointer; transition: background .1s;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: #faf8f7; }
+    .item-row.checked { background: var(--ev-light); }
+
+    .item-check {
+      flex-shrink: 0; width: 19px; height: 19px;
+      border: 2px solid #c0bbb7; border-radius: 4px; margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s; background: var(--white);
+    }
+    .item-row.checked .item-check { background: var(--evergreen); border-color: var(--evergreen); }
+    .item-check svg { display: none; }
+    .item-row.checked .item-check svg { display: block; }
+
+    .item-content { flex: 1; min-width: 0; }
+    .item-label {
+      font-size: 13px; line-height: 1.45; color: var(--graphite); display: block;
+    }
+    .item-row.checked .item-label { color: var(--slate); text-decoration: line-through; text-decoration-color: #b0a9a5; }
+
+    /* ── Per-item note ── */
+    .item-note {
+      display: block; width: 100%; margin-top: 5px;
+      padding: 4px 8px; border: 1px solid #e0dad6; border-radius: 4px;
+      font-size: 12px; color: var(--slate); background: #faf8f7;
+      font-family: inherit; resize: none; outline: none; line-height: 1.4;
+    }
+    .item-note:focus { border-color: var(--evergreen); background: var(--white); }
+    .item-note::placeholder { color: #c0b8b4; font-style: italic; }
+
+    /* ── Notes area ── */
+    .notes-area { margin-top: 14px; }
+    .notes-area label {
+      display: block; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .5px;
+      color: var(--slate); margin-bottom: 5px;
+    }
+    .notes-area textarea {
+      width: 100%; border: 1.5px solid #d0cbc7; border-radius: 6px;
+      padding: 9px 12px; font-size: 13px; font-family: inherit;
+      color: var(--graphite); resize: vertical; min-height: 65px; outline: none;
+    }
+    .notes-area textarea:focus { border-color: var(--evergreen); }
+
+    /* ── Submit bar ── */
+    .submit-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--white); border-top: 1px solid #ddd8d4;
+      padding: 10px 16px; z-index: 90;
+    }
+    .submit-bar-inner {
+      max-width: 600px; margin: 0 auto;
+      display: flex; gap: 10px; align-items: center;
+    }
+    .btn-submit {
+      flex: 1; padding: 12px; border: none; border-radius: 6px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      background: var(--vermilion); color: var(--white); transition: background .15s;
+    }
+    .btn-submit:hover    { background: #d44e1a; }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-submit.submitted { background: var(--evergreen); pointer-events: none; }
+    .submit-count { font-size: 12px; color: var(--slate); white-space: nowrap; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 74px; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--graphite); color: var(--white);
+      padding: 9px 18px; border-radius: 20px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: opacity .25s, transform .25s;
+      pointer-events: none; z-index: 200; white-space: nowrap;
+    }
+    #toast.show    { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.success { background: var(--evergreen); }
+    #toast.error   { background: #c0392b; }
+
+    /* ── Period badge on setup ── */
+    .period-hint {
+      font-size: 11px; color: var(--evergreen); font-weight: 600;
+      background: var(--ev-light); border-radius: 4px;
+      padding: 3px 8px; display: inline-block; margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ SETUP ═══════════ -->
+<div id="setup-screen">
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC8EZcfAAAAM1BMVEX////////////////////////////////////////////////////////////////////lEOhHAAAAEXRSTlMAEECAcGCwwP/goCBQ8NCQMDfcrtkAAAKfSURBVHic7ZrZdoMgFEWJJpWkTeL/f21tY63i5Q6IQrvOfgx42BIHBJwDAAAAAAAAAAAAAAAAAAAAAAy0nZ+4tk1pnR8eXuRZSK2R1RZ0h9oZ5SbOR8id0nrpOdU67apHm7X6gHbPrvwg3NLugdtw5HtmO6r3NsUNp5v1aZTXbkq9Z4lx7rqH3Ys+R8jS7pIjMiupt+xRzPWupWUIdrr2slG5XvV+Dn4b+Qd+7ewqTRqlbAoQ/C5+zfpgpg4foBcU9CMtiIK95L9NMD627nWC8U8utd+Jqx9v3+sExQCZhqnOxI9HJBcbDHWCr3F/G+brBV83bxfW0Apy7sviiEFqAAQPEHxWIniLGlYi6KJdqshnj9UIPmIBWkNJUHwTpgaoDDX5fnq70TWaJT0VIAq2Gw0HwlmCVYWRLlbOTyIyHnH1FRZBMSBsL3KxKu6COS1fvOgoIUArwpwW2cKJK/TLf5KsYDV8cP1ODTrvesH53OsvfbQ7bOYj65GrRdBRM6NGQaeYMSIaEJqTAyyGxiYSBIkAg6DO0PYuJrjIgnpDKsskKAeYBFcjnlKC6nWFUoL2KxqCWwW9f/v+Yb4AGtYICItfj9nVdyvdZIKgbGAr5gXV61NMfKMRlAPoFtXLpeHqk0FAFOR6ROsXnz37iRDbj01vRRbwzILOvbFnr+igG1tK+pkEwzaSdiY8dQGSf2n+jF+lgn/Hr07Byv0UT6CSXOv2mw9wKvQLFspyRPY5QkaCF2Cu3RL3PH+ED8mSOjIMrT82Bazs8l9970NofGaeg5pL2na6Uc7f4eate/v33pzfiS/ue7ujzb7YdzvkyDnePs8RchNML5GU2ulM3QMBqnWdI2ja2Xu2q3BTHQAAAAAAAAAAAAAAAAAAAAAl+ARC9V9FKBIBJQAAAABJRU5ErkJggg==" alt="SES">
+      </div>
+      <div>
+        <div class="header-title">Branch Manager Checklist</div>
+        <div class="header-sub">Superior Environmental Solutions</div>
+      </div>
+    </div>
+  </header>
+  <div class="setup-card">
+    <h2>Start your checklist</h2>
+    <p>Select your branch and confirm the date. Progress auto-saves — you can close and return any time within the same period.</p>
+    <div class="form-group">
+      <label for="bm-name">Your Name</label>
+      <input type="text" id="bm-name" placeholder="First Last" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label for="branch-select">Branch</label>
+      <select id="branch-select"><option value="">— Select branch —</option></select>
+    </div>
+    <div class="form-group">
+      <label for="checklist-date">Date</label>
+      <input type="date" id="checklist-date">
+    </div>
+    <button class="btn-primary" onclick="startChecklist()">Begin Checklist →</button>
+  </div>
+</div>
+
+<!-- ═══════════ CHECKLIST ═══════════ -->
+<div id="checklist-screen" class="hidden">
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC8EZcfAAAAM1BMVEX////////////////////////////////////////////////////////////////////lEOhHAAAAEXRSTlMAEECAcGCwwP/goCBQ8NCQMDfcrtkAAAKfSURBVHic7ZrZdoMgFEWJJpWkTeL/f21tY63i5Q6IQrvOfgx42BIHBJwDAAAAAAAAAAAAAAAAAAAAAAy0nZ+4tk1pnR8eXuRZSK2R1RZ0h9oZ5SbOR8id0nrpOdU67apHm7X6gHbPrvwg3NLugdtw5HtmO6r3NsUNp5v1aZTXbkq9Z4lx7rqH3Ys+R8jS7pIjMiupt+xRzPWupWUIdrr2slG5XvV+Dn4b+Qd+7ewqTRqlbAoQ/C5+zfpgpg4foBcU9CMtiIK95L9NMD627nWC8U8utd+Jqx9v3+sExQCZhqnOxI9HJBcbDHWCr3F/G+brBV83bxfW0Apy7sviiEFqAAQPEHxWIniLGlYi6KJdqshnj9UIPmIBWkNJUHwTpgaoDDX5fnq70TWaJT0VIAq2Gw0HwlmCVYWRLlbOTyIyHnH1FRZBMSBsL3KxKu6COS1fvOgoIUArwpwW2cKJK/TLf5KsYDV8cP1ODTrvesH53OsvfbQ7bOYj65GrRdBRM6NGQaeYMSIaEJqTAyyGxiYSBIkAg6DO0PYuJrjIgnpDKsskKAeYBFcjnlKC6nWFUoL2KxqCWwW9f/v+Yb4AGtYICItfj9nVdyvdZIKgbGAr5gXV61NMfKMRlAPoFtXLpeHqk0FAFOR6ROsXnz37iRDbj01vRRbwzILOvbFnr+igG1tK+pkEwzaSdiY8dQGSf2n+jF+lgn/Hr07Byv0UT6CSXOv2mw9wKvQLFspyRPY5QkaCF2Cu3RL3PH+ED8mSOjIMrT82Bazs8l9970NofGaeg5pL2na6Uc7f4eate/v33pzfiS/ue7ujzb7YdzvkyDnePs8RchNML5GU2ulM3QMBqnWdI2ja2Xu2q3BTHQAAAAAAAAAAAAAAAAAAAAAl+ARC9V9FKBIBJQAAAABJRU5ErkJggg==" alt="SES">
+      </div>
+      <div>
+        <div class="header-title">Branch Manager Checklist</div>
+        <div class="header-sub">Superior Environmental Solutions</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span id="hdr-name"></span><br>
+      <span id="hdr-date" style="opacity:.7"></span>
+    </div>
+  </header>
+
+  <div class="context-bar">
+    <span id="ctx-branch"></span>
+    <a href="#" onclick="resetToSetup();return false;">← Change</a>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-cadence="daily"     onclick="switchCadence('daily')">Daily<span class="tab-pill" id="pill-daily">0/16</span></button>
+    <button class="tab-btn"        data-cadence="weekly"    onclick="switchCadence('weekly')">Weekly<span class="tab-pill" id="pill-weekly">0/22</span></button>
+    <button class="tab-btn"        data-cadence="monthly"   onclick="switchCadence('monthly')">Monthly<span class="tab-pill" id="pill-monthly">0/24</span></button>
+    <button class="tab-btn"        data-cadence="quarterly" onclick="switchCadence('quarterly')">Quarterly<span class="tab-pill" id="pill-quarterly">0/22</span></button>
+  </div>
+
+  <div class="progress-strip">
+    <div class="progress-label">
+      <span id="prog-label">0 of 0 complete</span>
+      <strong id="prog-pct">0%</strong>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="checklist-body" id="checklist-body"></div>
+
+  <div class="submit-bar">
+    <div class="submit-bar-inner">
+      <span class="submit-count" id="submit-count"></span>
+      <button class="btn-submit" id="submit-btn" onclick="submitCadence()">Submit Daily Checklist</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIG
+   To update checklist questions: edit the CHECKLISTS object below.
+   Each section has a "title" and an "items" array of strings.
+   Add, remove, or reword items freely — then re-upload to GitHub.
+══════════════════════════════════════════ */
+const CONFIG = {
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbygj2mGahK7H6UXtoo0UXMZKhqaGHk2u6w2Czlaurq--oX0_uecqgf76MRZKCLSjvI/exec',
+  branches: [
+    'Appleton, WI','Asheville, NC','Bellefontaine, OH','Castleberry, AL',
+    'Cedar Rapids, IA','Cincinnati, OH','Cincinnati/Steger, OH','Covington, OH',
+    'Dayton, OH','Gardner, IL','Hattiesburg, MS','Huntsville, AL',
+    'Huntsville, AL - Specialty Svcs','Indianapolis, IN','Kalamazoo, MI',
+    'Loudon, TN','Mira Loma, CA','Mobile, AL','New Orleans, LA',
+    'Oklahoma City, OK','Omaha, NE','Owensboro, KY','Peoria, IL',
+    'Richmond, VA','Sidney, OH','St. Louis, MO','Toledo, OH',
+    'Waterville, OH','Wisconsin Rapids, WI',
+  ],
+};
+
+const CHECKLISTS = {
+  daily: { label:'Daily', sections:[
+    { title:'Safety', items:[
+      'Daily LPSA conversations with direct reports',
+      'Visit job sites & verify quality of JLA usage',
+      'Confirm LPO schedule is posted & focused on at-risk jobs',
+    ]},
+    { title:'Operations (Scheduling)', items:[
+      'Review dispatch job board',
+      'Confirm right crews & crew mix',
+      'Confirm equipment is ready',
+      'Minimize travel & adjust schedule proactively',
+    ]},
+    { title:'Financial Control', items:[
+      'Obtain POs for all jobs',
+      'Review, approve tickets',
+      'Spot-check OT, equipment utilization & fuel',
+    ]},
+    { title:'Communication', items:[
+      'Daily supervisor alignment & next-day job-board assignments',
+      'Escalate issues early (Safety / Ops / HR / Finance)',
+    ]},
+    { title:'People Leadership', items:[
+      'Document performance events immediately',
+      'Recognize employees going above & beyond',
+      'Coach supervisors in real time',
+      'Monitor morale & reinforce healthy culture',
+    ]},
+  ]},
+  weekly: { label:'Weekly', sections:[
+    { title:'Safety Review', items:[
+      'Review LPO / LI / NLI in LPIS for the week',
+      'Attend a weekly safety meeting at one of your sites',
+      'Reinforce standards & coach the team',
+    ]},
+    { title:'Financial Ownership', items:[
+      'Review, approve timecards in ADP',
+      'Review revenue vs. plan',
+      'Review crew mix ratio on air mover and waterblast jobs',
+      'Review sub-k charge vs. bill rate',
+      'Ensure rental equipment is meeting utilization targets and being billed correctly',
+    ]},
+    { title:'Forecasting', items:[
+      'Update forecast (current month + 90 days)',
+      'Confirm pipeline vs. booked work',
+      'Identify gaps early & close them',
+    ]},
+    { title:'Cost Control', items:[
+      'Review overtime % & travel usage',
+      'Review equipment maintenance & rentals',
+      'Review variable spend, adjust to current revenue run rate',
+      'Act on outliers immediately',
+    ]},
+    { title:'People Development', items:[
+      'Hold a 1:1 with each supervisor',
+      'Evaluate performance, readiness & risk',
+    ]},
+    { title:'HR & Recruiting Partnership', items:[
+      'Review hiring pipeline with recruiter',
+      'Address employee issues early',
+      'Maintain proactive HR communication',
+    ]},
+    { title:'Customer & Growth', items:[
+      'Check in with top 3-5 accounts (call or visit)',
+      'Flag at-risk accounts to your Regional Manager',
+    ]},
+  ]},
+  monthly: { label:'Monthly', sections:[
+    { title:'Safety Review', items:[
+      'Hold LPS Monthly Stewardship meeting',
+      'Close all FRSCs for LPO / LI / NLI in LPIS',
+      'Attend a site LPS Stewardship meeting',
+    ]},
+    { title:'Month-End Discipline', items:[
+      'All tickets approved',
+      'All POs collected',
+      'Sign-off on all invoices',
+      'All vendor invoices submitted on time',
+    ]},
+    { title:'P&L Ownership', items:[
+      'Full financial review',
+      'Margin leakage, crew mix, labor & rental costs',
+      'Equipment repair, cost issues, out-of-period',
+      'Identify any no-PO purchases',
+    ]},
+    { title:'Forecast Accuracy', items:[
+      'Compare forecast vs. actual',
+      'Document misses & root causes',
+      'Adjust forward forecast',
+    ]},
+    { title:'Equipment & Asset Management', items:[
+      'Confirm PMs scheduled; no overdue units',
+      'Audit on-site rentals — every unit assigned',
+      'Flag repeat repairs / cost outliers',
+      'Align availability to 30-day forward schedule',
+    ]},
+    { title:'Performance Management', items:[
+      'Branch Scorecard review: safety, revenue, margin, AR, turnover',
+      'Hold supervisors accountable',
+    ]},
+    { title:'Training & Systems', items:[
+      'Track self-proficiency in ADP, DOMO, NetSuite, Projection Model, Salesforce quoting',
+      'Close skill gaps via coaching',
+    ]},
+    { title:'People Development', items:[
+      'Hold 1:1 with each supervisor bi-weekly',
+      'Build retention and succession plans',
+    ]},
+  ]},
+  quarterly: { label:'Quarterly', sections:[
+    { title:'Safety Review', items:[
+      'Review LPIS data for trends around LPO / LI / NLI',
+      'Use leading indicators from LPIS to drive long-term, sustainable change',
+      'Identify new JLAs that need development',
+    ]},
+    { title:'Strategic Planning', items:[
+      'Set quarterly revenue targets',
+      'Set margin goals',
+      'Align with regional leadership',
+    ]},
+    { title:'Talent & Bench', items:[
+      'Talent review (successors, high-potentials)',
+      'Mentor & develop high performers',
+      'Build bench-strength plan',
+    ]},
+    { title:'Training & Development', items:[
+      'LPIS training',
+      'NetSuite / DOMO / Salesforce',
+      'ADP systems training',
+      'Cross-branch learning',
+    ]},
+    { title:'Operations Review', items:[
+      'Evaluate scheduling effectiveness',
+      'Evaluate process adherence',
+      'Identify breakdowns & assign actions',
+    ]},
+    { title:'Customer Review', items:[
+      'Top-account review',
+      'Lost-business analysis',
+      'Pricing evaluation',
+    ]},
+    { title:'Culture & Engagement', items:[
+      'Assess employee engagement',
+      'Address trust gaps proactively',
+      'Improve communication flow',
+    ]},
+  ]},
+};
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let state = {
+  bmName:'', branch:'', date:'', cadence:'daily',
+  checks:{}, notes:{}, itemNotes:{}, submitted:{},
+};
+
+/* ══════════════════════════════════════════
+   PERIOD KEY — determines which draft to load
+   daily    → YYYY-MM-DD  (resets every calendar day)
+   weekly   → YYYY-Www    (resets every Monday)
+   monthly  → YYYY-MM     (resets every 1st of month)
+   quarterly→ YYYY-Qn     (resets every quarter)
+══════════════════════════════════════════ */
+function getPeriodKey(cadence, dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (cadence === 'daily') return dateStr;
+  if (cadence === 'weekly') {
+    const day  = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
+    const mon  = new Date(d); mon.setDate(diff);
+    return mon.toLocaleDateString('en-CA');
+  }
+  if (cadence === 'monthly')   return dateStr.slice(0,7);
+  if (cadence === 'quarterly') return d.getFullYear()+'-Q'+Math.ceil((d.getMonth()+1)/3);
+  return dateStr;
+}
+
+function periodLabel(cadence, dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (cadence === 'daily')     return 'Resets daily';
+  if (cadence === 'weekly')    return 'Week of ' + getPeriodKey('weekly', dateStr);
+  if (cadence === 'monthly')   return 'Month: ' + dateStr.slice(0,7);
+  if (cadence === 'quarterly') return d.getFullYear()+' Q'+Math.ceil((d.getMonth()+1)/3);
+  return '';
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+(function init() {
+  const sel = document.getElementById('branch-select');
+  CONFIG.branches.forEach(b => {
+    const o = document.createElement('option'); o.value = o.textContent = b; sel.appendChild(o);
+  });
+  document.getElementById('checklist-date').value = todayStr();
+  const saved = lsGet('ses_session');
+  if (saved && saved.date === todayStr()) {
+    document.getElementById('bm-name').value       = saved.bmName  || '';
+    document.getElementById('branch-select').value = saved.branch  || '';
+  }
+})();
+
+/* ══════════════════════════════════════════
+   SETUP → CHECKLIST
+══════════════════════════════════════════ */
+function startChecklist() {
+  const name   = document.getElementById('bm-name').value.trim();
+  const branch = document.getElementById('branch-select').value;
+  const date   = document.getElementById('checklist-date').value;
+  if (!name)   { showToast('Please enter your name.','error'); return; }
+  if (!branch) { showToast('Please select your branch.','error'); return; }
+  if (!date)   { showToast('Please confirm the date.','error'); return; }
+
+  state.bmName = name; state.branch = branch; state.date = date;
+
+  // Load each cadence's draft from its own period key
+  state.checks    = {}; state.notes = {}; state.itemNotes = {}; state.submitted = {};
+  ['daily','weekly','monthly','quarterly'].forEach(c => {
+    const draft = lsGet(draftKey(name, branch, c, date));
+    if (draft) {
+      state.checks[c]    = draft.checks    || {};
+      state.notes[c]     = draft.notes     || '';
+      state.itemNotes[c] = draft.itemNotes || {};
+      state.submitted[c] = draft.submitted || false;
+    }
+  });
+
+  lsSet('ses_session', { bmName:name, branch, date });
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('checklist-screen').classList.remove('hidden');
+  document.getElementById('hdr-name').textContent  = name;
+  document.getElementById('hdr-date').textContent  = formatDate(date);
+  document.getElementById('ctx-branch').textContent = branch;
+  switchCadence('daily');
+}
+
+function resetToSetup() {
+  document.getElementById('checklist-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+}
+
+/* ══════════════════════════════════════════
+   TAB
+══════════════════════════════════════════ */
+function switchCadence(c) {
+  state.cadence = c;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.cadence===c));
+  renderChecklist(); updateProgress(); updateSubmitBar(); updateAllPills();
+}
+
+/* ══════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════ */
+function renderChecklist() {
+  const c    = state.cadence;
+  const data = CHECKLISTS[c];
+  const chks = state.checks[c]    || {};
+  const inotes = state.itemNotes[c] || {};
+  const done = state.submitted[c];
+  let html = '';
+
+  if (done) {
+    html += '<div class="submitted-banner">'
+      +'<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+      +'<div class="submitted-banner-text">'
+      +'<p>'+data.label+' checklist submitted</p>'
+      +'<span>Record saved. You can edit and resubmit to update.</span>'
+      +'<button class="btn-resubmit" onclick="unlockForResubmit(\''+c+'\')">Edit &amp; Resubmit</button>'
+      +'</div></div>';
+  }
+
+  data.sections.forEach((sec,si) => {
+    html += '<div class="section"><div class="section-header">'+sec.title+'</div><div class="section-items">';
+    sec.items.forEach((item,ii) => {
+      const k       = si+'|'+ii;
+      const checked = chks[k]   || false;
+      const note    = inotes[k] || '';
+      html += '<div class="item-row'+(checked?' checked':'')+'" '
+        +'data-cadence="'+c+'" data-key="'+k+'" '
+        +'onclick="handleItemClick(event,\''+c+'\',\''+k+'\')" '
+        +'role="checkbox" aria-checked="'+checked+'" tabindex="0" '
+        +'onkeydown="if(event.key===\' \'||event.key===\'Enter\'){handleItemClick(event,\''+c+'\',\''+k+'\');event.preventDefault()}">'
+        +'<div class="item-check">'
+        +'<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>'
+        +'</div>'
+        +'<div class="item-content">'
+        +'<span class="item-label">'+item+'</span>'
+        +'<input class="item-note" type="text" placeholder="Add a note (optional)..." '
+        +'value="'+escHtml(note)+'" '
+        +'onmousedown="event.stopPropagation()" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()" '
+        +'oninput="saveItemNote(\''+c+'\',\''+k+'\',this.value)">'
+        +'</div></div>';
+    });
+    html += '</div></div>';
+  });
+
+  const genNote = state.notes[c] || '';
+  html += '<div class="notes-area"><label>General Notes (optional)</label>'
+    +'<textarea placeholder="Add any context or blockers for your RM..." '
+    +'oninput="saveGeneralNote(\''+c+'\',this.value)">'+escHtml(genNote)+'</textarea></div>';
+
+  document.getElementById('checklist-body').innerHTML = html;
+  document.getElementById('checklist-body').scrollTop = 0;
+}
+
+/* ══════════════════════════════════════════
+   TOGGLE / NOTES
+══════════════════════════════════════════ */
+function handleItemClick(event, c, k) {
+  if (event.target.classList.contains('item-note')) return;
+  if (state.submitted[c]) return;
+  if (!state.checks[c]) state.checks[c] = {};
+  state.checks[c][k] = !state.checks[c][k];
+
+  // Update DOM in place
+  const row = document.querySelector('[data-cadence="'+c+'"][data-key="'+k+'"]');
+  if (row) {
+    const checked = state.checks[c][k];
+    row.classList.toggle('checked', checked);
+    row.setAttribute('aria-checked', String(checked));
+  }
+  saveDraft(c); updateProgress(); updateSubmitBar(); updateAllPills();
+}
+
+function saveItemNote(c, k, val) {
+  if (!state.itemNotes[c]) state.itemNotes[c] = {};
+  state.itemNotes[c][k] = val;
+  saveDraft(c);
+}
+
+function saveGeneralNote(c, val) {
+  state.notes[c] = val;
+  saveDraft(c);
+}
+
+function unlockForResubmit(c) {
+  state.submitted[c] = false;
+  saveDraft(c);
+  renderChecklist(); updateSubmitBar(); updateAllPills();
+}
+
+/* ══════════════════════════════════════════
+   PROGRESS
+══════════════════════════════════════════ */
+function countItems(c)   { return CHECKLISTS[c].sections.reduce((n,s)=>n+s.items.length,0); }
+function countChecked(c) { return Object.values(state.checks[c]||{}).filter(Boolean).length; }
+
+function updateProgress() {
+  const c=state.cadence, total=countItems(c), checked=countChecked(c);
+  const pct = total ? Math.round(checked/total*100) : 0;
+  document.getElementById('prog-label').textContent = checked+' of '+total+' complete';
+  document.getElementById('prog-pct').textContent   = pct+'%';
+  const fill = document.getElementById('prog-fill');
+  fill.style.width = pct+'%';
+  fill.classList.toggle('complete', pct===100);
+}
+
+function updateAllPills() {
+  ['daily','weekly','monthly','quarterly'].forEach(c => {
+    const pill = document.getElementById('pill-'+c);
+    const tab  = document.querySelector('.tab-btn[data-cadence="'+c+'"]');
+    if (state.submitted[c]) {
+      pill.textContent = '✓'; tab.classList.add('done');
+    } else {
+      pill.textContent = countChecked(c)+'/'+countItems(c); tab.classList.remove('done');
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   SUBMIT
+══════════════════════════════════════════ */
+function updateSubmitBar() {
+  const c=state.cadence, data=CHECKLISTS[c];
+  const btn=document.getElementById('submit-btn'), cnt=document.getElementById('submit-count');
+  if (state.submitted[c]) {
+    btn.textContent = data.label+' Submitted ✓';
+    btn.classList.add('submitted'); btn.disabled = true; cnt.textContent='';
+  } else {
+    btn.textContent = 'Submit '+data.label+' Checklist';
+    btn.classList.remove('submitted'); btn.disabled = false;
+    cnt.textContent = countChecked(c)+'/'+countItems(c);
+  }
+}
+
+async function submitCadence() {
+  const c=state.cadence;
+  if (countChecked(c)===0) { showToast('Check at least one item first.','error'); return; }
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  const payload = buildPayload(c);
+  try {
+    const res  = await fetch(CONFIG.scriptUrl, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) });
+    const json = await res.json();
+    if (json.status==='ok') {
+      state.submitted[c] = true;
+      saveDraft(c); renderChecklist(); updateProgress(); updateSubmitBar(); updateAllPills();
+      showToast(CHECKLISTS[c].label+' checklist saved!','success');
+    } else throw new Error(json.error||'Error');
+  } catch(err) {
+    btn.textContent = 'Submit '+CHECKLISTS[c].label+' Checklist'; btn.disabled=false;
+    showToast('Submit failed — check your connection.','error');
+  }
+}
+
+function buildPayload(c) {
+  const data=CHECKLISTS[c], chks=state.checks[c]||{}, inotes=state.itemNotes[c]||{};
+  const total=countItems(c), checked=countChecked(c);
+  const items={};
+  const noteLines=[];
+  data.sections.forEach((sec,si) => {
+    sec.items.forEach((item,ii) => {
+      const k=si+'|'+ii;
+      items[sec.title+': '+item] = chks[k] ? 'Yes' : 'No';
+      if (inotes[k]) noteLines.push('  '+item+': '+inotes[k]);
+    });
+  });
+  let notes = state.notes[c]||'';
+  if (noteLines.length) notes += (notes?'\n\n':'')+'Item notes:\n'+noteLines.join('\n');
+  return {
+    timestamp: new Date().toISOString(),
+    date: state.date, bm_name: state.bmName, branch: state.branch,
+    cadence: c, pct_complete: total ? Math.round(checked/total*100) : 0,
+    items, notes,
+  };
+}
+
+/* ══════════════════════════════════════════
+   PERSISTENCE
+══════════════════════════════════════════ */
+function draftKey(name, branch, cadence, dateStr) {
+  const period = getPeriodKey(cadence, dateStr);
+  return ('ses_'+name+'_'+branch+'_'+cadence+'_'+period).replace(/[^a-zA-Z0-9_-]/g,'_');
+}
+
+function saveDraft(c) {
+  const k = draftKey(state.bmName, state.branch, c, state.date);
+  lsSet(k, { checks:state.checks[c]||{}, notes:state.notes[c]||'', itemNotes:state.itemNotes[c]||{}, submitted:state.submitted[c]||false });
+}
+
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
+function lsSet(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch{} }
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function todayStr() { return new Date().toLocaleDateString('en-CA'); }
+function formatDate(s) {
+  if(!s) return '';
+  const [y,m,d]=s.split('-');
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+parseInt(d)+', '+y;
+}
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+let _tt;
+function showToast(msg,type='') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show'+(type?' '+type:'');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.className='',3000);
+}
+</script>
+</body>
+</html>
